@@ -1,6 +1,6 @@
 # fid-clip
 
-## with this repository, you can calculate fid-clip (encoder with pretrained CLIP viT), aligned with with existing imagenet-fid. 
+## with this repository, you can calculate fid-clip (encoder with pretrained CLIP viT), aligned with existing imagenet-fid. 
 
 
 ### Reproduction of FID-clip suggested in The Role of ImageNet Classes in Fréchet Inception Distance[https://arxiv.org/abs/2203.06026] (not official version)
