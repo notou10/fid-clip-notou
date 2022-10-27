@@ -11,7 +11,7 @@ due to
 1. pickle download issue,
 2. want to calculate on generated sample not on-line generating
 
-with existing repository, I repoduced fid-clip above.
+with existing repository, I reproduced fid-clip above.
 
 # prerequisites 
 
