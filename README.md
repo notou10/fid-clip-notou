@@ -2,12 +2,16 @@
 
 ## with this repository, you can calculate fid-clip (encoder with pretrained CLIP viT), with existing imagenet-fid. 
 
+
+### Reproduction of FID-clip suggested in The Role of ImageNet Classes in Fréchet Inception Distance[https://arxiv.org/abs/2203.06026] (not official version)
+
 Reproduction from(thanks to) https://github.com/kynkaat/role-of-imagenet-classes-in-fid 
 
-(due to 
+due to 
 1. pickle download issue,
 2. want to calculate on generated sample not on-line generating
-with existing repository, I repoduced this repository)
+
+with existing repository, I repoduced fid-clip above.
 
 # prerequisites 
 
@@ -47,4 +51,21 @@ CUDA_VISIBLE_DEVICES=$1 python fid_no_patch.py \
 ```
 
 total_img_num : you can calculate only subset of your datasets for speed.
+
+then output will be saved like this 
+
+<img width="380" alt="image" src="https://user-images.githubusercontent.com/45427036/198289542-7b08c74e-c477-41ad-aed0-0124bcf7fd8b.png">
+
+
+---
+## caution 
+
+```
+compute(real_dir, generated_dir, total_img_num=10000, batch_size = 200) 
+```
+
+in compute(), total_img_num%batch_size should be 0. if not, it will cause errors. 
+
+somebody please fix it ㅋㅋ
+
 
