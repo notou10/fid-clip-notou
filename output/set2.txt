@@ -1,0 +1,10 @@
+task: ('house', 'ground') 
+fid-imgnet : 35.81446858664408 
+fid-clip : 15.317257713737902 
+
+
+task: ('house', 'ground') 
+fid-imgnet : 35.81446858664408 
+fid-clip : 15.317257713737902 
+
+

@@ -184,6 +184,7 @@ class ImageFolderDataset(Dataset):
         name = os.path.splitext(os.path.basename(self._path))[0]
         raw_shape = [len(self._image_fnames)] + list(self._load_raw_image(0).shape)
         if resolution is not None and (raw_shape[2] != resolution or raw_shape[3] != resolution):
+            #import pdb; pdb.set_trace()
             raise IOError('Image files do not match the specified resolution')
         super().__init__(name=name, raw_shape=raw_shape, **super_kwargs)
 
@@ -220,7 +221,11 @@ class ImageFolderDataset(Dataset):
             if pyspng is not None and self._file_ext(fname) == '.png':
                 image = pyspng.load(f.read())
             else:
-                image = np.array(PIL.Image.open(f))
+                #image = np.array(PIL.Image.open(f))
+                image = PIL.Image.open(f)
+                image = image.convert('RGB')
+                image = np.array(image)
+
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
         image = image.transpose(2, 0, 1) # HWC => CHW
@@ -276,10 +281,3 @@ def get_dataloader(zip_path: str,
 
 #----------------------------------------------------------------------------
 
-
-def fake_transform():
-    return transforms.Compose([
-        transforms.Resize((256,256)),
-        transforms.ToTensor(),
-        #transforms.RandomVerticalFlip(p=1.0),
-        lambda x: x*255])

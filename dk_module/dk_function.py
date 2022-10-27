@@ -27,6 +27,9 @@ from dk_module.dk_dataloader import *
 from PIL import Image
 from itertools import combinations
 import dnnlib
+import torch.nn.functional as F
+import pytorch_model_summary
+#print(pytorch_model_summary.summary(inception_v3, torch.zeros(1,3,))
 
 metrics_kwargs = dict(return_features=True)
 feature_kwargs = dict(return_features=False)
@@ -117,9 +120,9 @@ def load_feature_network(network_name: str) -> Any:
     #return model
     return network
 
-def fake_transform():
+def clip_transform():
     return transforms.Compose([
-        transforms.Resize((256,256)), 
+        #transforms.Resize((256,256)), 
         transforms.ToTensor(), #0~255 scale
         lambda x: (x*127.5+128).clamp(0, 255).to(torch.uint8)])
 
@@ -127,44 +130,70 @@ clip = load_feature_network(network_name='clip').to(device)
 inception_v3 = load_feature_network(network_name='inception_v3_tf').to(device)
 
 
-def compute(real_dir, generated_dir, total_img_num=10000, batch_size=200):
-    dataloader_real = get_dataloader(zip_path=real_dir,
-                                resolution=256,
+def compute(real_dir, generated_dir, total_img_num=10000, batch_size=200, H_W_same=True):
+    
+    #resolutions=256
+    # if H_W_same==False:
+    #     resolutions=None
+        
+    dataloader_imgnet_real = get_dataloader(zip_path=real_dir,
+                                resolution=None, #None if your image's H, W is different
                                 batch_size=batch_size,
                                 num_images=real_dir)
-    fake_dataset = torchvision.datasets.ImageFolder(root=f"{generated_dir}", transform=fake_transform())
-    fake_dataloader = torch.utils.data.DataLoader(
-                fake_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    dataloader_imgnet_generated = get_dataloader(zip_path=generated_dir,
+                                resolution=None, #None if your image's H, W is different
+                                batch_size=batch_size,
+                                num_images=real_dir)
+    
+    real_dataset_clip = torchvision.datasets.ImageFolder(root=f"{real_dir}", transform=clip_transform())
+    generated_dataset_clip = torchvision.datasets.ImageFolder(root=f"{generated_dir}", transform=clip_transform())
+    dataloader_clip_real = torch.utils.data.DataLoader(
+                real_dataset_clip, batch_size=batch_size, shuffle=False, num_workers=4)
+    dataloader_clip_generated = torch.utils.data.DataLoader(
+                generated_dataset_clip, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    real_features = []
     real_metrics_features=[]
     fake_metrics_features=[]
     real_clip_features = []
-    fake_features = []
     fake_clip_features = []
-  
-    for num, (img, _) in tqdm(enumerate(dataloader_real), total=len(dataloader_real)):
-        with torch.no_grad():
-            #img = torch.tensor(img, dtype = torch.uint8)
-            img, _ = img.to(device), _.to(device)
-            real_metrics_features.append(inception_v3(img.to(device), **metrics_kwargs).cpu().numpy())    
-            real_clip_features.append(clip(img.to(device)).cpu().numpy())
-            if sum([a.shape[0] for a in real_clip_features]) == total_img_num :break
-      
-    real_metrics_features = np.concatenate(real_metrics_features, axis=0)
-    real_clip_features = np.concatenate(real_clip_features, axis=0)
-
     
-    for index, (data, _) in tqdm(enumerate(fake_dataloader), total=len(fake_dataloader)):
+    #fid-imgnet
+    #fid-imgnet real
+    for num, (img, _) in tqdm(enumerate(dataloader_imgnet_real), total=len(dataloader_imgnet_real)):
+        with torch.no_grad():
+            img, _ = img.to(device), _.to(device)
+            real_metrics_features.append(inception_v3(img, **metrics_kwargs).cpu().numpy())    
+            if sum([a.shape[0] for a in real_metrics_features]) == total_img_num :break
+    
+    
+    #fid-imgnet generated       
+    for num, (img, _) in tqdm(enumerate(dataloader_imgnet_generated), total=len(dataloader_imgnet_generated)):
+        with torch.no_grad():
+            img, _ = img.to(device), _.to(device)
+            fake_metrics_features.append(inception_v3(img, **metrics_kwargs).cpu().numpy())    
+            if sum([a.shape[0] for a in fake_metrics_features]) == total_img_num :break
+            
+    
+    #fid-clip  
+    #fid-clip real
+    for index, (data, _) in tqdm(enumerate(dataloader_clip_real), total=len(dataloader_clip_real)):
         with torch.no_grad():
             data,_= data.to(device, dtype=torch.uint8), _.to(device)
-            
-            fake_features.append(inception_v3(data.to(device), **feature_kwargs).cpu().numpy())
-            fake_metrics_features.append(inception_v3(data.to(device), **metrics_kwargs).cpu().numpy())    
-            fake_clip_features.append(clip(data.to(device)).cpu().numpy())
+            real_clip_features.append(clip(data).cpu().numpy())
             if sum([a.shape[0] for a in real_clip_features]) == total_img_num :break
-    
+            
+    #fid-clip generated
+    for index, (data, _) in tqdm(enumerate(dataloader_clip_generated), total=len(dataloader_clip_generated)):
+        with torch.no_grad():
+            data,_= data.to(device, dtype=torch.uint8), _.to(device)
+
+            fake_clip_features.append(clip(data).cpu().numpy())
+            if sum([a.shape[0] for a in fake_clip_features]) == total_img_num :break
+                
+      
+    real_metrics_features = np.concatenate(real_metrics_features, axis=0)
     fake_metrics_features = np.concatenate(fake_metrics_features, axis=0)
+    real_clip_features = np.concatenate(real_clip_features, axis=0)   
     fake_clip_features = np.concatenate(fake_clip_features, axis=0)
 
     fid_imgnet = compute_fid(real_features=real_metrics_features,

@@ -1,0 +1,10 @@
+task: ('sky', 'gt') 
+fid-imgnet : 37.106640168794655 
+fid-clip : 28.30766399159052 
+
+
+task: ('ground', 'sky') 
+fid-imgnet : 29.512326289429105 
+fid-clip : 15.65514084464969 
+
+
