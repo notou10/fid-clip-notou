@@ -1,5 +1,7 @@
 # fid-clip
 
+## with this repository, you can calculate fid-clip (encoder with pretrained CLIP viT), with existing imagenet-fid. 
+
 Reproduction from(thanks to) https://github.com/kynkaat/role-of-imagenet-classes-in-fid 
 
 (due to 1. pickle download issue, 2. want to calculate on generated sample not on-line generating)
