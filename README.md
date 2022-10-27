@@ -13,6 +13,8 @@ due to
 
 with existing repository, I reproduced fid-clip above.
 
+(+, fid-imagenet result will be same with (https://github.com/mseitzer/pytorch-fid) which most people uses)
+
 # prerequisites 
 
 should create environment first
