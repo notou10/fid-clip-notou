@@ -33,13 +33,13 @@ bash implement/fid_clipfid 0
 in fid_clipfid.sh, you should place your real/generated images folder like this below
 
 
-`
+```
 CUDA_VISIBLE_DEVICES=$1 python fid_no_patch.py \
 --real_dir "/mnt/hdd/dongkyun/PROJECTS/fid_clip/salient/lsun_cat/gt" \
 --generated_dir "/mnt/hdd/dongkyun/PROJECTS/fid_clip/salient/lsun_cat/gt_2"
 --batch_size 200 \
 --total_img_num 10000
-`
+```
 
 total_img_num : you can calculate only subset of your datasets for speed.
 
