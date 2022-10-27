@@ -40,7 +40,7 @@ _URL_TO_PKL_NAME = {'https://drive.google.com/uc?id=1j3pS3bdTXIYL56kpcpdMrrvPJVT
 
 def download_pickle(url: str,
                     pkl_name: str,
-                    pickle_dir: str = './.pickles/',
+                    pickle_dir: str = './pickles/',
                     num_attempts: int = 10,
                     chunk_size: int = 512 * 1024,  # 512 KB.
                     retry_delay: int = 2) -> str:
